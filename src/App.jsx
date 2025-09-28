@@ -8,7 +8,7 @@ export default function App() {
   const [error, setError] = useState("");
   const [newComment, setNewComment] = useState({});
 
-  const API_URL = "https://gobasera-b.onrender.com/announcements";
+  const API_URL = "https://gobasera-backend-1.onrender.com";
 
   useEffect(() => {
     fetchAnnouncements();
