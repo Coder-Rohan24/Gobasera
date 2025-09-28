@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 
 export default function App() {
@@ -7,11 +6,10 @@ export default function App() {
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [newComment, setNewComment] = useState({});
 
-  // const API_URL = "http://localhost:4000/announcements";
   const API_URL = "https://gobasera-b.onrender.com/announcements";
 
-  // Fetch announcements on load
   useEffect(() => {
     fetchAnnouncements();
   }, []);
@@ -33,17 +31,15 @@ export default function App() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
-
     try {
       const res = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, description }),
       });
-
       if (!res.ok) throw new Error("Failed to create announcement");
       const newItem = await res.json();
-      setAnnouncements((prev) => [newItem, ...prev]); // prepend new
+      setAnnouncements((prev) => [newItem, ...prev]);
       setTitle("");
       setDescription("");
     } catch (err) {
@@ -58,10 +54,8 @@ export default function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
       });
-
       if (!res.ok) throw new Error("Failed to update status");
       const updated = await res.json();
-
       setAnnouncements((prev) =>
         prev.map((a) => (a.id === id ? updated : a))
       );
@@ -70,52 +64,44 @@ export default function App() {
     }
   }
 
+  const handleCommentChange = (id, value) => {
+    setNewComment((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleAddComment = (id) => {
+    if (!newComment[id]) return;
+    setAnnouncements((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? { ...item, comments: [...(item.comments || []), newComment[id]] }
+          : item
+      )
+    );
+    setNewComment((prev) => ({ ...prev, [id]: "" }));
+  };
+
   return (
-//     <div style={{ maxWidth: 600, margin: "2rem auto", fontFamily: "sans-serif" }}>
-//       <h1>📢 Announcements</h1>
-//       <p
-//   style={{
-//     fontSize: "1rem",
-//     fontWeight: "500",
-//     color: "#555",
-//     marginBottom: "1.5rem",
-//   }}
-// >
-//   GoBasera
-// </p>
-
-<div style={{ maxWidth: 600, margin: "2rem auto", fontFamily: "sans-serif" }}>
-  <h1 style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>📢 Announcements</h1>
-
-  {/* Branding section */}
-  <div
-    style={{
-      display: "flex",
-      alignItems: "center",
-      gap: "8px",
-      marginBottom: "1.5rem",
-    }}
-  >
-    <img
-      src="https://media.licdn.com/dms/image/v2/D560BAQEV4NXSrxZtVw/company-logo_200_200/B56Zh2ma7PHUAQ-/0/1754336440472?e=1759968000&v=beta&t=FQ9LWaC0EAXaf0xOh5GPR5587GXlC4ofXYXE-U0bgVI"  // 🔹 replace with your actual logo path
-      alt="GoBasera Logo"
-      style={{ width: "28px", height: "28px", objectFit: "contain" }}
-    />
-    <span
-      style={{
-        fontSize: "1.1rem",
-        fontWeight: "600",
-        color: "#444",
-      }}
-    >
-      GoBasera
-    </span>
-  </div>
-
-  <hr style={{ border: "0.5px solid #eee", marginBottom: "1.5rem" }} />
-
-
-      {/* Form */}
+    <div style={{ maxWidth: 600, margin: "2rem auto", fontFamily: "sans-serif" }}>
+      <h1 style={{ fontSize: "2rem", marginBottom: "0.5rem" }}> Announcements</h1>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          marginBottom: "1.5rem",
+        }}
+      >
+        <span
+          style={{
+            fontSize: "1.1rem",
+            fontWeight: "600",
+            color: "#444",
+          }}
+        >
+          GoBasera
+        </span>
+      </div>
+      <hr style={{ border: "0.5px solid #eee", marginBottom: "1.5rem" }} />
       <form onSubmit={handleSubmit} style={{ marginBottom: "1rem" }}>
         <div>
           <input
@@ -166,10 +152,7 @@ export default function App() {
           Add Announcement
         </button>
       </form>
-
       {error && <p style={{ color: "red" }}>⚠ {error}</p>}
-
-      {/* Feed */}
       {loading ? (
         <p>Loading...</p>
       ) : announcements.length === 0 ? (
@@ -186,7 +169,6 @@ export default function App() {
                 marginBottom: "0.5rem",
               }}
             >
-              {/* Title + Status + Date in one row */}
               <div
                 style={{
                   display: "flex",
@@ -205,8 +187,6 @@ export default function App() {
                     ({a.status})
                   </span>
                 </h3>
-
-                {/* ✅ Date on the right */}
                 <small
                   style={{
                     color: "#666",
@@ -216,21 +196,11 @@ export default function App() {
                     gap: "4px",
                   }}
                 >
-                  <img
-                    src="https://thumb.ac-illust.com/94/94316b681605212a8b1e20d01692369e_t.jpeg"
-                    alt="clock icon"
-                    style={{ width: "14px", height: "14px" }}
-                  />
                   {new Date(a.createdAt).toLocaleString()}
                 </small>
               </div>
-
-              {/* Description */}
               {a.description && <p>{a.description}</p>}
-
-              {/* ✅ ClosedAt timestamp */}
               {a.status === "closed" && a.closedAt && (
-
                 <p
                   style={{
                     display: "flex",
@@ -239,19 +209,12 @@ export default function App() {
                     fontSize: "0.7rem",
                     color: "#d9534f",
                     marginTop: "0.5rem",
-                     }}
-                  >
-                    <img
-                    src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRyHzOtze9eQ1UERSVqmGZVbht4YJxSG2czCG5MFRaW8NenUoROxccWuDGRYIPfacqQZQc&usqp=CAU"
-                    alt="clock icon"
-                    style={{ width: "14px", height: "14px" }}
-                  />
+                  }}
+                >
                   <strong>Closed at:</strong>{" "}
                   {new Date(a.closedAt).toLocaleString()}
                 </p>
               )}
-
-              {/* Close button only if active */}
               {a.status === "active" && (
                 <button
                   onClick={() => updateStatus(a.id, "closed")}
@@ -268,10 +231,66 @@ export default function App() {
                   Close
                 </button>
               )}
+              <div style={{ marginTop: "0.5rem" }}>
+                <button
+                  style={{ color: "blue", marginRight: "8px" }}
+                  onClick={() =>
+                    setAnnouncements((prev) =>
+                      prev.map((item) =>
+                        item.id === a.id
+                          ? { ...item, like: (item.like || 0) + 1 }
+                          : item
+                      )
+                    )
+                  }
+                >
+                  Like {a.like || 0}
+                </button>
+                <button
+                  style={{ color: "blue", marginRight: "8px" }}
+                  onClick={() =>
+                    setAnnouncements((prev) =>
+                      prev.map((item) =>
+                        item.id === a.id
+                          ? { ...item, dislike: (item.dislike || 0) + 1 }
+                          : item
+                      )
+                    )
+                  }
+                >
+                  Dislike {a.dislike || 0}
+                </button>
+                <span style={{ fontSize: "0.9rem", color: "#555" }}>
+                  {a.comments?.length || 0} Comments
+                </span>
+              </div>
+              <div style={{ marginTop: "0.5rem" }}>
+                <input
+                  type="text"
+                  value={newComment[a.id] || ""}
+                  onChange={(e) => handleCommentChange(a.id, e.target.value)}
+                  placeholder="Add a comment"
+                  style={{ marginRight: "8px", padding: "4px" }}
+                />
+                <button
+                  style={{ color: "blue" }}
+                  onClick={() => handleAddComment(a.id)}
+                >
+                  Post
+                </button>
+                <div style={{ marginTop: "6px" }}>
+                  {(a.comments || []).map((c, i) => (
+                    <p key={i} style={{ margin: "4px 0" }}>
+                      • {c}
+                    </p>
+                  ))}
+                </div>
+              </div>
             </li>
           ))}
         </ul>
       )}
     </div>
+    
   );
 }
